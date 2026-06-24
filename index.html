@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>scaledbyfran | Offloading work, freeing your time</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+:root {
+  --black: #080808;
+  --black2: #0f0f0f;
+  --black3: #141414;
+  --border: #252525;
+  --border2: #333;
+  --gray: #666;
+  --gray2: #aaa;
+  --gray3: #bbb;
+  --text: #e8e4dc;
+  --gold: #c9a84c;
+  --gold2: #e8c96a;
+  --gold-dim: #9a7a3a;
+}
+body { font-family: 'Inter', sans-serif; background: var(--black); color: var(--text); overflow-x: hidden; }
+a { text-decoration: none; }
+
+/* ── TICKER ── */
+.ticker { background: var(--black2); border-bottom: 1px solid var(--border); padding: 10px 0; overflow: hidden; white-space: nowrap; }
+.ticker-inner { display: inline-flex; animation: tick 28s linear infinite; }
+@keyframes tick { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+.ticker-inner span { font-family: 'Space Grotesk', sans-serif; font-size: 10px; color: var(--gray); letter-spacing: 0.18em; text-transform: uppercase; margin: 0 2.4rem; }
+.ticker-inner .sep { color: var(--gold); margin: 0; }
+  .currency-select { display:inline-block; margin-left:0.6rem; background:var(--black2); border:1px solid var(--border2); color:var(--text); padding:6px 8px; border-radius:4px; font-family: 'Space Grotesk', sans-serif; font-size:12px; }
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 200;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.3rem 3rem; background: rgba(8,8,8,0.96);
+  backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
+}
+.nav-brand { display: flex; align-items: center; }
+.brand-link {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-decoration: none;
+}
+.brand-link span { color: var(--gold); }
+.brand-link:hover { color: var(--gold2); }
+.nav-brand svg { height: 28px; width: auto; }
+.nav-links { display: flex; gap: 2.2rem; }
+.nav-links a { font-family: 'Space Grotesk', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #999; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-btn {
+  font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--black);
+  background: var(--gold); padding: 11px 24px; border-radius: 3px;
+  transition: background 0.2s;
+}
+.nav-btn:hover { background: var(--gold2); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 92vh; display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 0 3rem 5rem; position: relative; border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0; overflow: hidden;
+}
+.hero-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  /* simplified flat dark background (removed noisy SVG) */
+  background: linear-gradient(#111111, #070707);
+  background-size: cover;
+  background-position: center;
+  opacity: 1;
+}
+.hero-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  /* subtle dark overlay only */
+  background: linear-gradient(to bottom, rgba(8,8,8,0) 60%, rgba(8,8,8,1) 100%);
+}
+.hero-line {
+  position: absolute; top: 0; right: 3rem; width: 1px;
+  height: 100%; background: linear-gradient(to bottom, transparent, var(--border) 20%, var(--border) 80%, transparent);
+}
+.hero-line2 {
+  position: absolute; top: 0; right: 30%; width: 1px;
+  height: 100%; background: linear-gradient(to bottom, transparent, var(--border) 30%, transparent);
+  opacity: 0.4;
+}
+.hero-content { position: relative; z-index: 1; max-width: 860px; }
+.hero-eyebrow {
+  font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 1.8rem;
+  display: flex; align-items: center; gap: 12px;
+}
+.hero-eyebrow::before { content: ''; display: block; width: 32px; height: 1px; background: var(--gold); }
+h1 {
+  font-family: 'Cormorant Garamond', serif; font-size: clamp(48px, 7.5vw, 96px);
+  font-weight: 700; line-height: 1.08; letter-spacing: -0.02em; margin-bottom: 2rem;
+}
+h1 .gold { color: var(--gold); }
+h1 .outline {
+  color: #a2d8b7;
+  text-shadow: 0 0 6px rgba(100, 170, 110, 0.25), 0 0 18px rgba(74, 126, 91, 0.12);
+  -webkit-text-stroke: 0.8px rgba(91, 132, 94, 0.85);
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.hero-sub {
+  font-size: 15px; color: var(--gray3); line-height: 1.75; max-width: 440px;
+  margin-bottom: 2.8rem; border-left: 2px solid var(--gold-dim); padding-left: 1.2rem;
+}
+.hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+.btn-gold {
+  font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--black);
+  background: var(--gold); padding: 15px 36px; border-radius: 3px;
+  transition: background 0.2s; display: inline-block;
+}
+.btn-gold:hover { background: var(--gold2); }
+.btn-outline {
+  font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text);
+  border: 1px solid var(--border2); padding: 15px 36px; border-radius: 3px;
+  transition: border-color 0.2s; display: inline-block;
+}
+.btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── CREDENTIALS ── */
+.cred-bar {
+  display: flex; align-items: center; gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+.cred-intro {
+  padding: 1.6rem 2.5rem; border-right: 1px solid var(--border);
+  font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--gray); white-space: nowrap;
+}
+.cred-names { display: flex; overflow: hidden; flex: 1; }
+.cred-name {
+  padding: 1.6rem 2.5rem; border-right: 1px solid var(--border);
+  font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600;
+  color: var(--gray3); white-space: nowrap; transition: color 0.2s;
+}
+.cred-name:hover { color: var(--gold); }
+.cred-name:last-child { border-right: none; }
+.cred-name a { color: var(--text); text-decoration: none; }
+.cred-name a:hover { color: var(--gold); }
+
+/* ── WHAT I DO ── */
+.section { padding: 5rem 3rem; border-bottom: 1px solid var(--border); }
+.section-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3.5rem; }
+.section-label {
+  font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 0.8rem;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-label::before { content: ''; display: block; width: 20px; height: 1px; background: var(--gold); }
+.section-head h2 {
+  font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 52px);
+  font-weight: 700; line-height: 1.05; letter-spacing: -0.01em;
+}
+.services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); }
+.service-card {
+  background: var(--black); padding: 2.5rem 2rem;
+  position: relative; overflow: hidden; transition: background 0.3s, border-color 0.3s;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.service-card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; background: var(--gold); transform: scaleX(0);
+  transform-origin: left; transition: transform 0.3s;
+}
+.service-card:hover { background: var(--black2); border-color: rgba(201,168,76,0.3); }
+.service-card:hover::after { transform: scaleX(1); }
+.service-icon {
+  font-size: 28px; margin-bottom: 1rem; display: inline-block;
+}
+.platform-icons { display:flex; gap:0.6rem; margin-bottom:0.8rem; }
+.platform-icon svg { width:20px; height:20px; display:block; fill: none; stroke: var(--gold); stroke-width:1.2; opacity:0.95; }
+.budget-row { display:flex; gap:0.6rem; align-items:center; }
+.budget-row select, .budget-row .currency-select, .budget-row input { min-width:0; }
+.lang-select { display:inline-block; background:var(--black2); border:1px solid var(--border2); color:var(--text); padding:6px 8px; border-radius:4px; font-family: 'Space Grotesk', sans-serif; font-size:12px; }
+.service-num {
+  font-family: 'Cormorant Garamond', serif; font-size: 48px; font-weight: 400;
+  color: var(--border2); line-height: 1; margin-bottom: 1.2rem;
+  transition: color 0.3s;
+}
+.service-card:hover .service-num { color: var(--gold-dim); }
+.service-card h3 {
+  font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700;
+  margin-bottom: 0.7rem; color: var(--text);
+}
+.service-card p { font-size: 13px; color: var(--gray2); line-height: 1.7; }
+
+/* ── HOW IT WORKS ── */
+.how-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
+.how-card { background: var(--black); padding: 2.5rem 2rem; }
+.how-step {
+  font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 0.8rem;
+}
+.how-card h3 {
+  font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 700;
+  margin-bottom: 0.6rem; line-height: 1.2;
+}
+.how-card p { font-size: 13px; color: var(--gray2); line-height: 1.7; }
+
+/* ── WHY ME ── */
+.why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: center; }
+.why-text p { font-size: 14px; color: var(--gray2); line-height: 1.85; margin-bottom: 1.2rem; }
+.why-text p:last-child { margin-bottom: 0; }
+.why-quote {
+  background: var(--black2); border: 1px solid var(--border);
+  border-left: 3px solid var(--gold); padding: 2rem;
+  font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400;
+  color: var(--text); line-height: 1.55; font-style: italic;
+}
+.why-quote cite {
+  display: block; font-family: 'Space Grotesk', sans-serif; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold);
+  font-style: normal; margin-top: 1rem;
+}
+
+/* ── CONTACT ── */
+.contact-section { padding: 5rem 3rem; border-bottom: 1px solid var(--border); }
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+.contact-intro p { font-size: 14px; color: var(--gray2); line-height: 1.85; margin-bottom: 2rem; }
+.contact-methods { display: flex; flex-direction: column; gap: 10px; }
+.contact-link {
+  display: flex; align-items: center; gap: 14px;
+  padding: 1.1rem 1.4rem; background: var(--black2);
+  border: 1px solid var(--border); border-radius: 4px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.contact-link:hover { border-color: var(--gold); background: var(--black3); }
+.contact-link .cl-icon { font-size: 18px; min-width: 24px; }
+.contact-link .cl-info { display: flex; flex-direction: column; }
+.contact-link .cl-label {
+  font-family: 'Space Grotesk', sans-serif; font-size: 9px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--gray); margin-bottom: 2px;
+}
+.contact-link .cl-val {
+  font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--text);
+}
+.contact-link .cl-arrow { margin-left: auto; color: var(--gray); font-size: 18px; transition: color 0.2s; }
+.contact-link:hover .cl-arrow { color: var(--gold); }
+
+/* FORM */
+.contact-form { display: flex; flex-direction: column; gap: 12px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label {
+  font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--gray);
+}
+.form-group input, .form-group textarea, .form-group select {
+  background: var(--black2); border: 1px solid var(--border2); border-radius: 3px;
+  padding: 12px 14px; font-family: 'Inter', sans-serif; font-size: 14px;
+  color: var(--text); outline: none; transition: border-color 0.2s; resize: none;
+  -webkit-appearance: none;
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--gold); }
+.form-group input::placeholder, .form-group textarea::placeholder { color: var(--gray); }
+.form-group textarea { min-height: 110px; }
+.form-submit {
+  font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--black);
+  background: var(--gold); border: none; padding: 15px; border-radius: 3px;
+  cursor: pointer; transition: background 0.2s; width: 100%;
+}
+.form-submit:hover { background: var(--gold2); }
+.form-note { font-size: 11px; color: var(--gray); text-align: center; margin-top: 4px; }
+
+.form-error { color: #e08b8b; font-size: 12px; margin-top: 6px; }
+.file-preview img { max-width: 120px; max-height: 120px; display: block; margin-top: 8px; border-radius:4px; }
+
+/* ── FOOTER ── */
+footer {
+  padding: 2rem 3rem; display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid var(--border);
+}
+.footer-brand { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; color: var(--text); }
+.footer-brand em { color: var(--gold); font-style: normal; }
+.footer-right { display: flex; align-items: center; gap: 2rem; }
+.footer-right a {
+  font-family: 'Space Grotesk', sans-serif; font-size: 11px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--gray); transition: color 0.2s;
+}
+.footer-right a:hover { color: var(--gold); }
+footer small { font-size: 11px; color: var(--border2); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  nav { padding: 1.1rem 1.5rem; }
+  .nav-links { display: none; }
+  .hero { padding: 0 1.5rem 3.5rem; min-height: 85vh; }
+  .section { padding: 3.5rem 1.5rem; }
+  .services-grid { grid-template-columns: 1fr; }
+  .how-grid { grid-template-columns: 1fr; }
+  .budget-row { flex-direction: column; align-items: stretch; }
+  .why-grid { grid-template-columns: 1fr; }
+  .contact-section { padding: 3.5rem 1.5rem; }
+  .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  .form-row { grid-template-columns: 1fr; }
+  .cred-bar { flex-direction: column; align-items: flex-start; }
+  .cred-name { border-right: none; border-bottom: 1px solid var(--border); width: 100%; }
+  footer { flex-direction: column; gap: 1rem; text-align: center; padding: 1.5rem; }
+  .footer-right { flex-direction: column; gap: 0.8rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span>Paid Ads</span><span class="sep">✦</span>
+    <span>Brand Scaling</span><span class="sep">✦</span>
+    <span>Facebook &amp; Instagram Ads</span><span class="sep">✦</span>
+    <span>TikTok Ads</span><span class="sep">✦</span>
+    <span>Google Ads</span><span class="sep">✦</span>
+    <span>Performance Marketing</span><span class="sep">✦</span>
+    <span>Customer Acquisition</span><span class="sep">✦</span>
+    <span>Paid Ads</span><span class="sep">✦</span>
+    <span>Brand Scaling</span><span class="sep">✦</span>
+    <span>Facebook &amp; Instagram Ads</span><span class="sep">✦</span>
+    <span>TikTok Ads</span><span class="sep">✦</span>
+    <span>Google Ads</span><span class="sep">✦</span>
+    <span>Performance Marketing</span><span class="sep">✦</span>
+    <span>Customer Acquisition</span><span class="sep">✦</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <a href="#top" class="brand-link">scaled<span>by</span>fran</a>
+  </div>
+  <div class="nav-links">
+    <a href="#services" data-i18n="nav_services">Services</a>
+    <a href="#how" data-i18n="nav_process">Process</a>
+    <a href="#why" data-i18n="nav_about">About</a>
+    <a href="#contact" data-i18n="nav_contact">Contact</a>
+  </div>
+  <select id="topLangSelect" class="lang-select" aria-label="Site language">
+    <option value="en">English</option>
+    <option value="es">Español</option>
+    <option value="fr">Français</option>
+  </select>
+  <a href="#contact" class="nav-btn" data-i18n="nav_work">Work with me</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-line"></div>
+  <div class="hero-line2"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow" data-i18n="hero_eyebrow">Offloading work and freeing your time</div>
+    <h1>
+      <span data-i18n="hero_line1">Offload the work.</span><br>
+      <span class="gold" data-i18n="hero_line2">Free your time.</span><br>
+      <span class="outline" data-i18n="hero_line3">Scale your brand.</span>
+    </h1>
+    <p class="hero-sub" data-i18n="hero_sub">Premium brand scaling and ad campaigns designed to turn your time back into growth.</p>
+    <div class="hero-ctas">
+      <a href="#contact" class="btn-gold" data-i18n="cta_start">Start scaling →</a>
+      <a href="#services" class="btn-outline" data-i18n="cta_services">What I do</a>
+    </div>
+  </div>
+</section>
+
+<!-- CREDENTIALS -->
+<div class="cred-bar">
+  <div class="cred-intro">Boutique brand scaling</div>
+  <div class="cred-names">
+    <div class="cred-name">scaledbyfran</div>
+    <div class="cred-name">Brand strategy & media</div>
+    <div class="cred-name">Freelance growth partner</div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="section" id="services">
+  <div class="section-head">
+    <div>
+      <div class="section-label" data-i18n="label_services">What I do</div>
+      <h2 data-i18n="heading_services">Built to get<br>you customers.</h2>
+    </div>
+  </div>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-num">01</div>
+      <div class="platform-icons" aria-hidden="true">
+          <!-- smartphone -->
+          <span class="platform-icon" title="Social - mobile">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2" ry="2"/></svg>
+          </span>
+          <!-- video/play -->
+          <span class="platform-icon" title="Video - TikTok/shorts">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M5 3v18l14-9z"/></svg>
+          </span>
+          <!-- image/photo -->
+          <span class="platform-icon" title="Feed - Instagram">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" ry="3"/><circle cx="12" cy="12" r="3"/></svg>
+          </span>
+        </div>
+      <h3 data-i18n="service1_title">Paid Social Ads</h3>
+      <p data-i18n="service1_desc">Facebook, Instagram and TikTok campaigns built to convert cold audiences into paying customers. Full creative, targeting and daily optimisation included.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-num">02</div>
+      <div class="platform-icons" aria-hidden="true">
+        <!-- search -->
+        <span class="platform-icon" title="Search - Google">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M21 21l-4.35-4.35"/></svg>
+        </span>
+        <!-- display/desktop -->
+        <span class="platform-icon" title="Display">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1" ry="1"/><rect x="8" y="18" width="8" height="2"/></svg>
+        </span>
+      </div>
+      <h3 data-i18n="service2_title">Google Ads</h3>
+      <p data-i18n="service2_desc">Search and display campaigns that put your business in front of people actively looking for what you offer. High intent, high conversion.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-num">03</div>
+      <div class="platform-icons" aria-hidden="true">
+        <!-- chart up -->
+        <span class="platform-icon" title="Performance">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/></svg>
+        </span>
+        <!-- rocket/scale -->
+        <span class="platform-icon" title="Scale">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2c3 3 6 6 6 6s-3 3-6 6-6-6-6-6 3-3 6-6z"/><path d="M7 17l-4 4 4-1 1-3z"/></svg>
+        </span>
+      </div>
+      <h3 data-i18n="service3_title">Brand Scaling</h3>
+      <p data-i18n="service3_desc">Already getting results? I'll help you scale ad spend efficiently without letting your ROAS drop — finding the ceiling before your competitors do.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+  <div class="section-head">
+    <div>
+      <div class="section-label" data-i18n="label_process">The process</div>
+      <h2 data-i18n="heading_process">Simple, fast,<br>results-first.</h2>
+    </div>
+  </div>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-step">Step 01</div>
+      <h3 data-i18n="how1_title">Discovery Call</h3>
+      <p data-i18n="how1_desc">We get on a free call, I learn your business inside out — your customers, your margins, your goals — and map out exactly what paid traffic approach makes sense for you.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-step">Step 02</div>
+      <h3 data-i18n="how2_title">Strategy & Setup</h3>
+      <p data-i18n="how2_desc">I handle everything — pixel installation, ad creative, audience research and campaign build. You're kept in the loop at every stage. Usually live within 5 days.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-step">Step 03</div>
+      <h3 data-i18n="how3_title">Launch & Learn</h3>
+      <p data-i18n="how3_desc">Campaigns go live and I gather data. Every decision from here is backed by numbers — no gut feelings, no guessing. I find what converts and cut what doesn't.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-step">Step 04</div>
+      <h3 data-i18n="how4_title">Scale</h3>
+      <p data-i18n="how4_desc">Once we know what works, we scale it. Budget increases on winners, constant creative testing, and weekly reports so you always know exactly where your money is going.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHY ME -->
+<section class="section" id="why">
+  <div class="section-head">
+    <div>
+      <div class="section-label">Why work with me</div>
+      <h2>Built around scaledbyfran’s brand-first approach: smart campaigns, fewer moving parts, more time for you.</h2>
+    </div>
+  </div>
+  <div class="why-grid">
+    <div class="why-text">
+      <p>I've been mentored by and studied under some of the most respected names in paid advertising and brand scaling — people who have spent millions in ad budgets and built systems that consistently deliver returns.</p>
+      <p>That knowledge is what I bring to every client. Whether you're spending <span class="dyn-amt" data-amount="500"></span>/month or <span class="dyn-amt" data-amount="50000"></span>/month, the principles that drive profitable advertising are the same.</p>
+      <p>I work with a small number of clients at any one time so I can give every campaign the attention it deserves. You won't be an afterthought here.</p>
+      <a href="#contact" class="btn-gold" style="margin-top:1.5rem; display:inline-block;">Let's talk →</a>
+    </div>
+    <div>
+      <div class="why-quote">
+        "The difference between a business that scales and one that stagnates is almost always the quality of its customer acquisition. Ads done right aren't a cost — they're your most powerful asset."
+        <cite>— Scaled by Fran</cite>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <div class="section-head" style="margin-bottom:3rem">
+    <div>
+      <div class="section-label" data-i18n="label_contact">Get in touch</div>
+      <h2 data-i18n="heading_contact">Ready to scale<br>your brand?</h2>
+    </div>
+  </div>
+  <div class="contact-grid">
+    <div>
+      <div class="contact-intro">
+        <p data-i18n="contact_intro">Whether you're an established brand looking to push further or a business ready to start investing in paid traffic — reach out. The first conversation is always free.</p>
+      </div>
+      <div class="contact-methods">
+        <a href="https://instagram.com/scaledbyfran" target="_blank" class="contact-link">
+          <span class="cl-icon">📱</span>
+          <div class="cl-info">
+            <span class="cl-label" data-i18n="contact_instagram_label">Instagram</span>
+            <span class="cl-val">@scaledbyfran</span>
+          </div>
+          <span class="cl-arrow">↗</span>
+        </a>
+        <a href="mailto:scaledbyfran@outlook.com" class="contact-link">
+          <span class="cl-icon">✉️</span>
+          <div class="cl-info">
+            <span class="cl-label" data-i18n="contact_email_label">Email</span>
+            <span class="cl-val">scaledbyfran@outlook.com</span>
+          </div>
+          <span class="cl-arrow">↗</span>
+        </a>
+      </div>
+    </div>
+    <div>
+      <form id="contactForm" class="contact-form" action="https://formspree.io/f/mojzgpzr" method="POST" enctype="multipart/form-data" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label data-i18n="label_name">Your name</label>
+            <input type="text" name="name" placeholder="John Smith" data-i18n-placeholder="ph_name" required>
+          </div>
+          <div class="form-group">
+            <label data-i18n="label_business">Business name</label>
+            <input type="text" name="business" placeholder="Acme Ltd" data-i18n-placeholder="ph_business" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label data-i18n="label_email">Email address</label>
+          <input type="email" name="email" placeholder="scaledbyfran@outlook.com" data-i18n-placeholder="ph_email" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label data-i18n="label_phone">Phone number (optional)</label>
+            <input type="tel" name="phone" placeholder="+44 7123 456789" data-i18n-placeholder="ph_phone">
+          </div>
+          <div class="form-group">
+            <label data-i18n="label_instagram">Instagram handle (optional)</label>
+            <input type="text" name="instagram" placeholder="@yourbrand" data-i18n-placeholder="ph_instagram">
+          </div>
+        </div>
+          <div class="form-group">
+          <label data-i18n="label_budget">Monthly ad budget</label>
+          <div class="budget-row">
+            <select id="currencySelect" class="currency-select" aria-label="Currency selector">
+              <option value="USD">$ USD</option>
+              <option value="GBP">£ GBP</option>
+              <option value="EUR">€ EUR</option>
+            </select>
+            <input type="hidden" id="budgetCurrencyHidden" name="budget_currency" value="USD">
+            <input type="hidden" id="langHidden" name="lang" value="en">
+            <select name="budget" id="budgetSelect">
+              <option value="" disabled selected data-i18n="budget_select_prompt">Select a range</option>
+              <option value="under-500" data-i18n="budget_under">Under $500/month</option>
+              <option value="500-1500" data-i18n="budget_500_1500">$500 – $1,500/month</option>
+              <option value="1500-5000" data-i18n="budget_1500_5000">$1,500 – $5,000/month</option>
+              <option value="5000-plus" data-i18n="budget_5000_plus">$5,000+/month</option>
+              <option value="not-sure" data-i18n="budget_not_sure">Not sure yet</option>
+              <option value="other" data-i18n="budget_other">Other (enter amount)</option>
+            </select>
+          </div>
+          <input id="budgetCustom" name="budget_custom" type="text" placeholder="$2,500" data-i18n-placeholder="ph_budget_custom" style="display:none; margin-top:8px; padding:10px; background:var(--black2); border:1px solid var(--border2); color:var(--text); border-radius:3px; width:100%;">
+        </div>
+        <div class="form-group">
+          <label data-i18n="label_message">Tell me about your business</label>
+          <textarea name="message" placeholder="What do you sell, who are your customers, and what does a good result look like for you?" data-i18n-placeholder="ph_message"></textarea>
+        </div>
+        <div class="form-group">
+          <label data-i18n="label_attach">Attach a file (optional)</label>
+          <input id="fileInput" type="file" name="upload" accept="image/*,.pdf,.doc,.docx">
+          <div id="filePreview" class="file-preview" aria-hidden="true"></div>
+        </div>
+        <button type="submit" class="form-submit" data-i18n="form_submit">Send enquiry →</button>
+        <p class="form-note" data-i18n="form_note">I'll respond within 3 days.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <canvas id="logoCanvasFt" height="30" style="display:block;"></canvas>
+  </div>
+    <div class="footer-right">
+    <a href="#services" data-i18n="footer_services">Services</a>
+    <a href="#how" data-i18n="footer_process">Process</a>
+    <a href="#contact" data-i18n="footer_contact">Contact</a>
+    <a href="https://instagram.com/scaledbyfran" target="_blank" data-i18n="footer_instagram">Instagram</a>
+  </div>
+  <small data-i18n="footer_copyright">© 2026 scaledbyfran</small>
+</footer>
+
+<script>
+// Client-side validation, file checks and preview for the contact form
+(function () {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+  const submitBtn = form.querySelector('.form-submit');
+  const fileInput = document.getElementById('fileInput');
+  const filePreview = document.getElementById('filePreview');
+  const MAX_FILE_BYTES = 8 * 1024 * 1024; // 8MB
+  const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+  function clearErrors() {
+    form.querySelectorAll('.form-error').forEach(e => e.remove());
+  }
+
+  function showError(afterEl, msg) {
+    const s = document.createElement('div');
+    s.className = 'form-error';
+    s.textContent = msg;
+    afterEl.parentNode.appendChild(s);
+  }
+
+  function validEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function validateFile(file) {
+    const lang = (langHidden && langHidden.value) ? langHidden.value : 'en';
+    const T = translations[lang] || translations.en;
+    if (!file) return { ok: true };
+    if (file.size > MAX_FILE_BYTES) return { ok: false, msg: T.err_file_size || 'File is too large (max 8MB).' };
+    if (file.type && file.type.startsWith('image/')) return { ok: true };
+    if (allowedTypes.includes(file.type)) return { ok: true };
+    return { ok: false, msg: T.err_file_type || 'Unsupported file type. Use image, PDF or Word document.' };
+  }
+
+  function renderFilePreview(file) {
+    filePreview.innerHTML = '';
+    if (!file) return;
+    if (file.type && file.type.startsWith('image/')) {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.alt = 'Attachment preview';
+      filePreview.appendChild(img);
+      img.onload = () => URL.revokeObjectURL(img.src);
+    } else {
+      const note = document.createElement('div');
+      note.textContent = file.name;
+      filePreview.appendChild(note);
+    }
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener('change', (ev) => {
+      const f = ev.target.files && ev.target.files[0];
+      const check = validateFile(f);
+      filePreview.innerHTML = '';
+      if (!check.ok) {
+        showError(fileInput, check.msg);
+        ev.target.value = ''; // clear invalid file
+        return;
+      }
+      clearErrors();
+      renderFilePreview(f);
+    });
+  }
+
+  // budget custom amount toggle
+  const budgetSelectEl = document.getElementById('budgetSelect');
+  const budgetCustomEl = document.getElementById('budgetCustom');
+  const currencySelectEl = document.getElementById('currencySelect');
+  const budgetCurrencyHidden = document.getElementById('budgetCurrencyHidden');
+  function formatNumber(n) { return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  function updateBudgetLabels(sym) {
+    if (!budgetSelectEl) return;
+    const opts = budgetSelectEl.options;
+    if (opts.length >= 7) {
+      opts[1].text = `Under ${sym}${formatNumber(500)}/month`;
+      opts[2].text = `${sym}${formatNumber(500)} – ${sym}${formatNumber(1500)}/month`;
+      opts[3].text = `${sym}${formatNumber(1500)} – ${sym}${formatNumber(5000)}/month`;
+      opts[4].text = `${sym}${formatNumber(5000)}+/month`;
+    }
+    if (budgetCustomEl) budgetCustomEl.placeholder = `${sym}${formatNumber(2500)}`;
+    // update any dynamic amounts on page
+    document.querySelectorAll('.dyn-amt').forEach(el => {
+      const amt = el.getAttribute('data-amount') || '0';
+      el.textContent = `${sym}${formatNumber(Number(amt))}`;
+    });
+  }
+  if (currencySelectEl) {
+    currencySelectEl.addEventListener('change', () => {
+      const cur = currencySelectEl.value || 'USD';
+      const sym = cur === 'GBP' ? '£' : (cur === 'EUR' ? '€' : '$');
+      if (budgetCurrencyHidden) budgetCurrencyHidden.value = cur;
+      updateBudgetLabels(sym);
+    });
+    // init
+    (function(){ const sym = currencySelectEl.value === 'GBP' ? '£' : (currencySelectEl.value === 'EUR' ? '€' : '$'); updateBudgetLabels(sym); })();
+  }
+  // language selector (top) and translations
+  const topLangSelect = document.getElementById('topLangSelect');
+  const langHidden = document.getElementById('langHidden');
+
+  const translations = {
+    en: {
+      nav_services: 'Services', nav_process: 'Process', nav_about: 'About', nav_contact: 'Contact', nav_work: 'Work with me',
+      hero_eyebrow: 'Offloading work and freeing your time', hero_line1: 'Offload the work.', hero_line2: 'Free your time.', hero_line3: 'Scale your brand.', hero_sub: 'Premium brand scaling and ad campaigns designed to turn your time back into growth.',
+      cta_start: 'Start scaling →', cta_services: 'What I do',
+      label_services: 'What I do', heading_services: 'Built to get<br>the right buyers.',
+      service1_title: 'Paid Social Ads', service1_desc: 'High-intent Facebook, Instagram and TikTok campaigns designed to generate a steady stream of profitable leads and purchases. Creative, targeting and optimisation included.',
+      service2_title: 'Google Ads', service2_desc: 'Search and display campaigns that put your business in front of people actively searching for what you sell. Focused on lowering CPA and raising ROI.',
+      service3_title: 'Growth & Scale', service3_desc: 'If you already have ads working, I refine your funnel and increase spend on winners while protecting ROAS — scaling revenue without wasting budget.',
+      label_process: 'The process', heading_process: 'Simple, fast,<br>profit-first.',
+      how1_title: 'Discovery Call', how1_desc: 'We talk through your business, margins and customer value so the campaign is built around what actually moves the needle.',
+      how2_title: 'Strategy & Setup', how2_desc: 'I build the ads, landing strategy, tracking and audience setup with one goal: clients who spend and convert predictably. Most launches go live within one week.',
+      how3_title: 'Launch & Learn', how3_desc: 'Ads go live and I run early tests to identify what converts, then I optimise relentlessly for lower CPA and more revenue.',
+      how4_title: 'Scale', how4_desc: 'Once the winning formula is clear, I increase spend on high-performing ads while keeping performance metrics strong and your growth sustainable.',
+      label_contact: 'Get in touch', heading_contact: 'Ready to scale<br>your brand?', contact_intro: 'Whether you\'re an established brand looking to push further or a business ready to start investing in paid traffic — reach out. The first conversation is always free.',
+      form_submit: 'Send enquiry →',
+      /* form labels & placeholders */
+      label_name: 'Your name', ph_name: 'John Smith',
+      label_business: 'Business name', ph_business: 'Acme Ltd',
+      label_email: 'Email address', ph_email: 'scaledbyfran@outlook.com',
+      label_phone: 'Phone number (optional)', ph_phone: '+44 7123 456789',
+      label_instagram: 'Instagram handle (optional)', ph_instagram: '@yourbrand',
+      label_budget: 'Monthly ad budget', budget_select_prompt: 'Select a range',
+      budget_under: 'Under $500/month', budget_500_1500: '$500 – $1,500/month', budget_1500_5000: '$1,500 – $5,000/month',
+      budget_5000_plus: '$5,000+/month', budget_not_sure: 'Not sure yet', budget_other: 'Other (enter amount)',
+      ph_budget_custom: '$2,500',
+      label_message: 'Tell me about your business', ph_message: 'What do you sell, who are your customers, and what does a good result look like for you?',
+      label_attach: 'Attach a file (optional)', form_note: 'I\'ll respond within 3 days.',
+      /* footer */
+      footer_services: 'Services', footer_process: 'Process', footer_contact: 'Contact', footer_instagram: 'Instagram', footer_copyright: '© 2026 scaledbyfran'
+      , contact_instagram_label: 'Instagram', contact_email_label: 'Email',
+      /* errors */
+      err_name: 'Please enter your name.', err_business: 'Please enter your business name.', err_email_required: 'Please enter your email.',
+      err_email_invalid: 'Please enter a valid email address.', err_budget_required: 'Please select a budget range.', err_budget_custom_required: 'Please enter a budget amount.',
+      err_file_size: 'File is too large (max 8MB).', err_file_type: 'Unsupported file type. Use image, PDF or Word document.'
+    },
+    es: {
+      nav_services: 'Servicios', nav_process: 'Proceso', nav_about: 'Sobre', nav_contact: 'Contacto', nav_work: 'Trabaja conmigo',
+      hero_eyebrow: 'Descargando trabajo y liberando tu tiempo', hero_line1: 'Delega el trabajo.', hero_line2: 'Recupera tu tiempo.', hero_line3: 'Escala tu marca.', hero_sub: 'Escalado de marca premium y campañas publicitarias diseñadas para volver a convertir tu tiempo en crecimiento.',
+      cta_start: 'Empezar →', cta_services: 'Lo que hago',
+      label_services: 'Lo que hago', heading_services: 'Diseñado para conseguir<br>clientes.',
+      service1_title: 'Anuncios en redes', service1_desc: 'Campañas en Facebook, Instagram y TikTok diseñadas para convertir audiencias frías en clientes. Incluye creatividades, segmentación y optimización diaria.',
+      service2_title: 'Google Ads', service2_desc: 'Campañas de búsqueda y display que sitúan tu negocio frente a personas activamente buscando lo que ofreces. Alta intención, alta conversión.',
+      service3_title: 'Escalado de marca', service3_desc: 'Si ya obtienes resultados, te ayudo a escalar el gasto publicitario de forma eficiente sin perder ROAS — encontrando el techo antes que la competencia.',
+      label_process: 'El proceso', heading_process: 'Simple, rápido,<br>orientado a resultados.',
+      how1_title: 'Llamada de descubrimiento', how1_desc: 'Hablamos gratis; conozco tu negocio, clientes, márgenes y objetivos, y definimos la estrategia de tráfico pagado adecuada.',
+      how2_title: 'Estrategia y puesta en marcha', how2_desc: 'Me ocupo de todo: instalación de píxeles, creatividades, investigación de audiencias y creación de campañas. Normalmente en vivo en 5 días.',
+      how3_title: 'Lanzamiento y aprendizaje', how3_desc: 'Las campañas se lanzan y recojo datos. Cada decisión está respaldada por números — sin adivinanzas.',
+      how4_title: 'Escalar', how4_desc: 'Cuando sabemos qué funciona, escalamos. Aumentos de presupuesto en ganadores, pruebas creativas constantes e informes semanales.',
+      label_contact: 'Contacta', heading_contact: '¿Listo para escalar\ntu marca?', contact_intro: 'Si eres una marca consolidada que quiere avanzar o un negocio listo para invertir en tráfico pagado — contáctame. La primera conversación es gratuita.',
+      form_submit: 'Enviar consulta →',
+      /* form labels & placeholders */
+      label_name: 'Tu nombre', ph_name: 'Juan Pérez',
+      label_business: 'Nombre del negocio', ph_business: 'Empresa S.L.',
+      label_email: 'Correo electrónico', ph_email: 'tucorreo@ejemplo.com',
+      label_phone: 'Teléfono (opcional)', ph_phone: '+34 600 000 000',
+      label_instagram: 'Instagram (opcional)', ph_instagram: '@tumarca',
+      label_budget: 'Presupuesto mensual', budget_select_prompt: 'Selecciona un rango',
+      budget_under: 'Menos de $500/mes', budget_500_1500: '$500 – $1,500/mes', budget_1500_5000: '$1,500 – $5,000/mes',
+      budget_5000_plus: '$5,000+/mes', budget_not_sure: 'Aún no lo sé', budget_other: 'Otro (introduce cantidad)',
+      ph_budget_custom: '$2,500',
+      label_message: 'Cuéntame sobre tu negocio', ph_message: '¿Qué vendes, quiénes son tus clientes y qué sería un buen resultado para ti?',
+      label_attach: 'Adjunta un archivo (opcional)', form_note: 'Responderé en 3 días.',
+      /* footer */
+      footer_services: 'Servicios', footer_process: 'Proceso', footer_contact: 'Contacto', footer_instagram: 'Instagram', footer_copyright: '© 2026 scaledbyfran'
+      , contact_instagram_label: 'Instagram', contact_email_label: 'Correo',
+      /* errors */
+      err_name: 'Por favor introduce tu nombre.', err_business: 'Por favor introduce el nombre de tu negocio.', err_email_required: 'Por favor introduce tu correo electrónico.',
+      err_email_invalid: 'Por favor introduce una dirección de correo válida.', err_budget_required: 'Por favor selecciona un rango de presupuesto.', err_budget_custom_required: 'Por favor introduce un importe para el presupuesto.',
+      err_file_size: 'El archivo es demasiado grande (máx. 8MB).', err_file_type: 'Tipo de archivo no soportado. Usa imagen, PDF o Word.'
+    },
+    fr: {
+      nav_services: 'Services', nav_process: 'Processus', nav_about: 'À propos', nav_contact: 'Contact', nav_work: 'Travailler avec moi',
+      hero_eyebrow: 'Externaliser le travail et libérer votre temps', hero_line1: 'Externalisez le travail.', hero_line2: 'Libérez votre temps.', hero_line3: 'Faites grandir votre marque.', hero_sub: 'Scaling de marque premium et campagnes publicitaires conçues pour transformer votre temps en croissance.'}]}  ]}]}   
+      cta_start: 'Commencer →', cta_services: 'Ce que je fais',
+      label_services: 'Ce que je fais', heading_services: 'Conçu pour vous<br>apporter des clients.',
+      service1_title: 'Publicités sociales', service1_desc: 'Campagnes Facebook, Instagram et TikTok conçues pour convertir des audiences froides en clients payants. Création, ciblage et optimisation quotidiens inclus.',
+      service2_title: 'Google Ads', service2_desc: 'Campagnes Search et Display qui placent votre entreprise devant des personnes cherchant activement ce que vous offrez. Forte intention, haute conversion.',
+      service3_title: 'Scale de marque', service3_desc: 'Si vous obtenez déjà des résultats, je vous aide à augmenter les dépenses publicitaires efficacement sans laisser chuter le ROAS.',
+      label_process: 'Le processus', heading_process: 'Simple, rapide,<br>orienté résultats.',
+      how1_title: 'Appel découverte', how1_desc: 'Nous avons un appel gratuit; j\'apprends votre entreprise, vos clients, vos marges et vos objectifs, puis je définis une approche adaptée.',
+      how2_title: 'Stratégie & configuration', how2_desc: 'Je m\'occupe de tout — installation du pixel, créations, recherche d\'audiences et construction des campagnes. Généralement en ligne sous 5 jours.',
+      how3_title: 'Lancer & apprendre', how3_desc: 'Les campagnes sont lancées et je collecte des données. Chaque décision est basée sur les chiffres.',
+      how4_title: 'Scale', how4_desc: 'Une fois que nous savons ce qui fonctionne, nous montons en budget et testons constamment les créations.',
+      label_contact: 'Contactez-moi', heading_contact: 'Prêt à scaler\nvotre marque?', contact_intro: 'Que vous soyez une marque établie souhaitant aller plus loin ou une entreprise prête à investir — contactez-moi. La première conversation est gratuite.',
+      form_submit: 'Envoyer la demande →',
+      /* form labels & placeholders */
+      label_name: 'Votre nom', ph_name: 'Jean Dupont',
+      label_business: 'Nom de l\'entreprise', ph_business: 'Acme SARL',
+      label_email: 'Adresse e-mail', ph_email: 'votre@exemple.com',
+      label_phone: 'Téléphone (optionnel)', ph_phone: '+33 6 00 00 00 00',
+      label_instagram: 'Instagram (optionnel)', ph_instagram: '@votremarque',
+      label_budget: 'Budget publicitaire mensuel', budget_select_prompt: 'Sélectionnez une fourchette',
+      budget_under: 'Moins de $500/mois', budget_500_1500: '$500 – $1,500/mois', budget_1500_5000: '$1,500 – $5,000/mois',
+      budget_5000_plus: '$5,000+/mois', budget_not_sure: 'Pas encore sûr', budget_other: 'Autre (saisir le montant)',
+      ph_budget_custom: '$2,500',
+      label_message: 'Parlez-moi de votre entreprise', ph_message: 'Que vendez-vous, qui sont vos clients et quel serait un bon résultat pour vous?',
+      label_attach: 'Joindre un fichier (optionnel)', form_note: 'Je répondrai sous 3 jours.',
+      /* footer */
+      footer_services: 'Services', footer_process: 'Processus', footer_contact: 'Contact', footer_instagram: 'Instagram', footer_copyright: '© 2026 scaledbyfran'
+      , contact_instagram_label: 'Instagram', contact_email_label: 'E-mail',
+      /* errors */
+      err_name: 'Veuillez entrer votre nom.', err_business: 'Veuillez entrer le nom de votre entreprise.', err_email_required: 'Veuillez entrer votre e-mail.',
+      err_email_invalid: 'Veuillez entrer une adresse e-mail valide.', err_budget_required: 'Veuillez sélectionner une fourchette de budget.', err_budget_custom_required: 'Veuillez entrer un montant de budget.',
+      err_file_size: 'Le fichier est trop volumineux (max 8Mo).', err_file_type: 'Type de fichier non pris en charge. Utilisez une image, PDF ou Word.'
+    }
+  };
+
+  function applyTranslations(lang) {
+    const map = translations[lang] || translations.en;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (!key) return;
+      const val = map[key] || translations.en[key] || '';
+      // if the translation contains an explicit <br>, use innerHTML
+      if (val.indexOf('<br') !== -1) el.innerHTML = val;
+      else el.textContent = val;
+    });
+    // placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (!key) return;
+      el.placeholder = map[key] || translations.en[key] || '';
+    });
+    // translate option texts
+    document.querySelectorAll('option[data-i18n]').forEach(opt => {
+      const key = opt.getAttribute('data-i18n');
+      if (!key) return;
+      opt.text = map[key] || translations.en[key] || opt.text;
+    });
+    // translate specific footer/contact labels not using data-i18n elsewhere
+    const footerMap = {
+      'footer_services': ['footer-right a[href="#services"]', 'Services'],
+      'footer_process': ['footer-right a[href="#how"]', 'Process'],
+      'footer_contact': ['footer-right a[href="#contact"]', 'Contact'],
+      'footer_instagram': ['footer-right a[target="_blank"]', 'Instagram']
+    };
+    Object.keys(footerMap).forEach(k => {
+      const sel = footerMap[k][0];
+      const el = document.querySelector(sel);
+      if (el && map[k]) el.textContent = map[k];
+    });
+    const footSmall = document.querySelector('footer small');
+    if (footSmall && map.footer_copyright) footSmall.textContent = map.footer_copyright;
+    // ensure budget option labels use current currency symbol after translation
+    try {
+      const cur = (currencySelectEl && currencySelectEl.value) ? currencySelectEl.value : 'USD';
+      const sym = cur === 'GBP' ? '£' : (cur === 'EUR' ? '€' : '$');
+      if (typeof updateBudgetLabels === 'function') updateBudgetLabels(sym);
+    } catch (e) { /* ignore if not available yet */ }
+  }
+
+  if (topLangSelect && langHidden) {
+    topLangSelect.addEventListener('change', () => {
+      const v = topLangSelect.value || 'en';
+      langHidden.value = v;
+      localStorage.setItem('siteLang', v);
+      applyTranslations(v);
+    });
+    const saved = localStorage.getItem('siteLang') || topLangSelect.value || 'en';
+    topLangSelect.value = saved;
+    langHidden.value = saved;
+    applyTranslations(saved);
+  }
+  if (budgetSelectEl && budgetCustomEl) {
+    budgetSelectEl.addEventListener('change', () => {
+      if (budgetSelectEl.value === 'other') {
+        budgetCustomEl.style.display = 'block';
+        budgetCustomEl.focus();
+      } else {
+        budgetCustomEl.style.display = 'none';
+        budgetCustomEl.value = '';
+      }
+      const existing = budgetCustomEl.parentNode.querySelector('.form-error');
+      if (existing) existing.remove();
+    });
+  }
+
+  form.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    clearErrors();
+    let hasError = false;
+
+    const T = (langHidden && langHidden.value) ? (translations[langHidden.value] || translations.en) : translations.en;
+
+    const name = form.querySelector('input[name="name"]');
+    const business = form.querySelector('input[name="business"]');
+    const email = form.querySelector('input[name="email"]');
+    const budget = form.querySelector('select[name="budget"]');
+    const budgetCustom = form.querySelector('input[name="budget_custom"]');
+    const message = form.querySelector('textarea[name="message"]');
+    const file = fileInput && fileInput.files && fileInput.files[0];
+
+    if (!name || !name.value.trim()) { showError(name || form, T.err_name || 'Please enter your name.'); hasError = true; }
+    if (!business || !business.value.trim()) { showError(business || form, T.err_business || 'Please enter your business name.'); hasError = true; }
+    if (!email || !email.value.trim()) { showError(email || form, T.err_email_required || 'Please enter your email.'); hasError = true; }
+    else if (!validEmail(email.value.trim())) { showError(email, T.err_email_invalid || 'Please enter a valid email address.'); hasError = true; }
+    if (!budget || !budget.value) { showError(budget || form, T.err_budget_required || 'Please select a budget range.'); hasError = true; }
+    else if (budget && budget.value === 'other') {
+      if (!budgetCustom || !budgetCustom.value.trim()) { showError(budgetCustom || form, T.err_budget_custom_required || 'Please enter a budget amount.'); hasError = true; }
+    }
+
+    const fileCheck = validateFile(file);
+    if (!fileCheck.ok) { showError(fileInput || form, fileCheck.msg); hasError = true; }
+
+    if (hasError) {
+      const firstErr = form.querySelector('.form-error');
+      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    // disable button and submit
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+    }
+
+    form.submit();
+  });
+})();
+
+function drawDamascusLogo(canvasId, fontSize, h) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const ctx = canvas.getContext('2d');
+  const text = 'scaledbyfran';
+  canvas.style.height = h + 'px';
+  ctx.font = `700 ${fontSize}px "Cormorant Garamond", serif`;
+  const measured = ctx.measureText(text).width + 6;
+  canvas.width = Math.ceil(measured * dpr);
+  canvas.height = h * dpr;
+  canvas.style.width = Math.ceil(measured) + 'px';
+  ctx.scale(dpr, dpr);
+
+  // 1. Offscreen: draw text as mask
+  const off = document.createElement('canvas');
+  off.width = canvas.width; off.height = canvas.height;
+  const ox = off.getContext('2d');
+  ox.scale(dpr, dpr);
+  ox.font = `700 ${fontSize}px "Cormorant Garamond", serif`;
+  ox.fillStyle = '#fff';
+  ox.fillText(text, 3, fontSize * 0.88);
+
+  // 2. Damascus pattern offscreen
+  const dam = document.createElement('canvas');
+  dam.width = canvas.width; dam.height = canvas.height;
+  const dx = dam.getContext('2d');
+
+  // Dark steel base
+  const baseGrad = dx.createLinearGradient(0, 0, canvas.width / dpr, canvas.height / dpr);
+  baseGrad.addColorStop(0,    '#6b5a28');
+  baseGrad.addColorStop(0.2,  '#c9a84c');
+  baseGrad.addColorStop(0.38, '#f0d878');
+  baseGrad.addColorStop(0.55, '#a07828');
+  baseGrad.addColorStop(0.72, '#d4b04a');
+  baseGrad.addColorStop(0.88, '#b8903c');
+  baseGrad.addColorStop(1,    '#806020');
+  dx.fillStyle = baseGrad;
+  dx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Damascus flowing bands — the key visual
+  const W = canvas.width / dpr;
+  const H = canvas.height / dpr;
+  const bands = [
+    { y: H * 0.08, amp: H * 0.22, freq: 0.022, bright: 0.82, dark: true },
+    { y: H * 0.25, amp: H * 0.18, freq: 0.018, bright: 0.62, dark: false },
+    { y: H * 0.42, amp: H * 0.28, freq: 0.026, bright: 0.90, dark: false },
+    { y: H * 0.55, amp: H * 0.15, freq: 0.014, bright: 0.55, dark: true },
+    { y: H * 0.68, amp: H * 0.20, freq: 0.020, bright: 0.75, dark: false },
+    { y: H * 0.80, amp: H * 0.16, freq: 0.024, bright: 0.68, dark: true },
+    { y: H * 0.92, amp: H * 0.12, freq: 0.016, bright: 0.85, dark: false },
+  ];
+
+  bands.forEach(b => {
+    dx.beginPath();
+    for (let x = 0; x <= W; x++) {
+      const yWave = b.y + Math.sin(x * b.freq + b.y) * b.amp
+                      + Math.sin(x * b.freq * 1.7 + 1.2) * b.amp * 0.35
+                      + Math.sin(x * b.freq * 0.5 + 2.8) * b.amp * 0.2;
+      if (x === 0) dx.moveTo(x, yWave);
+      else dx.lineTo(x, yWave);
+    }
+    const alpha = b.dark ? 0.28 : 0.22;
+    const col = b.dark
+      ? `rgba(30,20,5,${alpha})`
+      : `rgba(255,230,140,${alpha})`;
+    dx.strokeStyle = col;
+    dx.lineWidth = b.dark ? 2.5 : 1.8;
+    dx.stroke();
+  });
+
+  // Fine grain lines
+  for (let i = 0; i < 18; i++) {
+    const yBase = (i / 18) * H;
+    dx.beginPath();
+    for (let x = 0; x <= W; x++) {
+      const y = yBase + Math.sin(x * 0.04 + i * 0.9) * H * 0.06
+                      + Math.sin(x * 0.015 + i * 1.4) * H * 0.04;
+      if (x === 0) dx.moveTo(x, y);
+      else dx.lineTo(x, y);
+    }
+    const bright = (i % 3 === 0);
+    dx.strokeStyle = bright ? `rgba(255,225,120,0.12)` : `rgba(20,12,0,0.10)`;
+    dx.lineWidth = 0.9;
+    dx.stroke();
+  }
+
+  // Edge highlight sheen
+  const sheen = dx.createLinearGradient(0, 0, W * 0.6, 0);
+  sheen.addColorStop(0,   'rgba(255,240,160,0.18)');
+  sheen.addColorStop(0.3, 'rgba(255,220,100,0.08)');
+  sheen.addColorStop(1,   'rgba(0,0,0,0)');
+  dx.fillStyle = sheen;
+  dx.fillRect(0, 0, W, H);
+
+  // 3. Composite: clip dam pattern to text shape
+  const mask = off.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+  const damImg = dam.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+  const out = ctx.createImageData(canvas.width, canvas.height);
+
+  for (let i = 0; i < mask.data.length; i += 4) {
+    const a = mask.data[i] / 255; // use red channel of white text as alpha
+    out.data[i]   = damImg.data[i];
+    out.data[i+1] = damImg.data[i+1];
+    out.data[i+2] = damImg.data[i+2];
+    out.data[i+3] = Math.round(damImg.data[i+3] * a);
+  }
+  ctx.putImageData(out, 0, 0);
+}
+
+// Wait for font to load then draw
+document.fonts.ready.then(() => {
+  drawDamascusLogo('logoCanvas', 26, 36);
+  drawDamascusLogo('logoCanvasFt', 22, 30);
+});
+</script>
+
+</body>
+</html>
